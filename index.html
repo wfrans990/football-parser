@@ -2,22 +2,31 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Football Parser</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>⚽ Football Match Converter</h1>
+<div class="container">
 
-<textarea id="inputData" placeholder="Paste data di sini..."></textarea>
+  <h1>⚽ Football Match Converter</h1>
 
-<button onclick="convertData()">Convert</button>
+  <textarea id="inputData" placeholder="Paste data di sini..." rows="15"></textarea>
 
-<h2>Output HTML:</h2>
-<textarea id="outputHTML"></textarea>
+  <div class="btn-group">
+    <button onclick="convertData()">⚡ Convert</button>
+    <button onclick="copyOutput()">📋 Copy</button>
+    <button onclick="clearAll()">🗑️ Clear</button>
+  </div>
 
-<h2>Preview:</h2>
-<div id="preview"></div>
+  <h2>Output HTML:</h2>
+  <textarea id="outputHTML" rows="15"></textarea>
+
+  <h2>Preview:</h2>
+  <div id="preview"></div>
+
+</div>
 
 <script src="script.js"></script>
 </body>
