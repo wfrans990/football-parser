@@ -6,6 +6,33 @@ function convertData() {
   document.getElementById("preview").innerHTML = result;
 }
 
+// COPY
+function copyOutput() {
+  const output = document.getElementById("outputHTML");
+  output.select();
+  document.execCommand("copy");
+  alert("Berhasil di-copy!");
+}
+
+// CLEAR
+function clearAll() {
+  document.getElementById("inputData").value = "";
+  document.getElementById("outputHTML").value = "";
+  document.getElementById("preview").innerHTML = "";
+}
+
+// ESCAPE HTML
+function escapeHTML(str) {
+  return str.replace(/[&<>"']/g, m => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[m]);
+}
+
+// GENERATE HTML
 function generateHTML(data) {
   const lines = data.split("\n");
 
@@ -13,83 +40,64 @@ function generateHTML(data) {
   let currentLeague = "";
   let matchIndex = 0;
 
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i].trim();
+  for (let line of lines) {
+    line = line.trim();
     if (!line) continue;
 
-    // 🟦 DETEKSI LIGA (baris tanpa jam)
-    if (!line.match(/\d{2}\/\d{2}/)) {
+    // DETEKSI LIGA
+    if (!/^\d{2}\/\d{2}/.test(line)) {
 
-      // tutup block sebelumnya
       if (currentLeague !== "") {
-        html += `
-</div>
-</div>
-<!-- END BLOCK -->
-`;
+        html += `</div></div><!-- END BLOCK -->`;
       }
 
       currentLeague = line;
       matchIndex = 0;
 
       html += `
-<div class="league-block" data-league="${currentLeague}">
+<div class="league-block">
 <div class="league-inner">
-
-<div class="league-crown">
 <div class="crown-name">🏆 ${currentLeague} 🏆</div>
-</div>
 `;
 
       continue;
     }
 
-    // 🟩 PARSE MATCH
-    const regex = /(\d{2}\/\d{2}) (\d{2}:\d{2}) WIB (.+) VS (.+) (\d+) : (\d+)/;
-    const match = line.match(regex);
+    // PARSE MATCH
+    const match = line.match(/(\d{2}\/\d{2})\s+(\d{2}:\d{2})\s+WIB\s+(.+?)\s+VS\s+(.+?)\s+(\d+)\s*:\s*(\d+)/);
 
     if (!match) continue;
 
-    let [, date, time, team1, team2, score1, score2] = match;
+    let [, date, time, team1, team2, s1, s2] = match;
 
-    // hapus ranking [21]
-    team1 = team1.replace(/\[\d+\]\s*/g, "");
-    team2 = team2.replace(/\[\d+\]\s*/g, "");
+    team1 = escapeHTML(team1.replace(/\[\d+\]|\[w\]/gi, "").trim());
+    team2 = escapeHTML(team2.replace(/\[\d+\]|\[w\]/gi, "").trim());
 
     const cardClass = matchIndex % 2 === 0 ? "even" : "odd";
     matchIndex++;
 
-    // 🟨 logo default (biar tidak kosong)
-    const logoLeft = "https://via.placeholder.com/30";
-    const logoRight = "https://via.placeholder.com/30";
-
     html += `
 <div class="match-card ${cardClass}">
-<div class="team-side left">
-<img class="team-logo" src="${logoLeft}">
-<span class="team-name">${team1}</span>
-</div>
+  <div class="team-side">
+    <img class="team-logo" src="https://via.placeholder.com/30">
+    <span>${team1}</span>
+  </div>
 
-<div class="score-center">
-<div class="score-num">${score1} : ${score2}</div>
-<div class="match-dt">${date}<br>${time} WIB</div>
-</div>
+  <div class="score-center">
+    <div class="score-num">${s1} : ${s2}</div>
+    <div class="match-dt">${date}<br>${time} WIB</div>
+  </div>
 
-<div class="team-side right">
-<img class="team-logo" src="${logoRight}">
-<span class="team-name">${team2}</span>
-</div>
+  <div class="team-side">
+    <img class="team-logo" src="https://via.placeholder.com/30">
+    <span>${team2}</span>
+  </div>
 </div>
 `;
   }
 
-  // tutup terakhir
   if (currentLeague !== "") {
-    html += `
-</div>
-</div>
-<!-- END BLOCK -->
-`;
+    html += `</div></div><!-- END BLOCK -->`;
   }
 
   return html;
